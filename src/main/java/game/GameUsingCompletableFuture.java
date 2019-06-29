@@ -16,9 +16,6 @@ public class GameUsingCompletableFuture {
 
     Runnable computerRunnable = () -> {
         computer = Rule.getHandEquivalent(random.nextInt(3) + 1);
-        System.out.println(Rule.whoWon(human, computer));
-        human=computer=null;
-        gameCount++;
     };
 
     Runnable humanRunnable = () -> {
@@ -33,8 +30,15 @@ public class GameUsingCompletableFuture {
 
     public synchronized void startGame(){
         for(int i=1 ; i<=numberOfTimes; i++){
-            CompletableFuture singleGame = CompletableFuture.runAsync(humanRunnable).thenRun(computerRunnable);
-            while (!singleGame.isDone()) {}
+            CompletableFuture singleGameHuman = CompletableFuture.runAsync(humanRunnable);
+            CompletableFuture singleGameComputer = CompletableFuture.runAsync(computerRunnable);
+
+            CompletableFuture combined = CompletableFuture.allOf(singleGameHuman, singleGameComputer);
+            while (!combined.isDone()) {}
+
+            System.out.println(Rule.whoWon(human, computer));
+            human=computer=null;
+            gameCount++;
         }
     }
 }
